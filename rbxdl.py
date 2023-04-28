@@ -76,12 +76,12 @@ def createDirectory(dirName):
         os.mkdir(str(dirName))
     return(str(dirName)) 
 #Save asset to file
-def saveAsset(astId, astTypeStr, cDir, sDirName, astData, astVer):
+def saveAsset(astId, astTypeStr, cDir, sDirName, astData, astVer, cName):
     try:
         createDirectory(cDir)
-        createDirectory(f'{cDir}\\{astTypeStr}')
-        saveLocation = createDirectory(f'{cDir}\\{astTypeStr}\\{astId}') if sDirName is True else f'{cDir}\\{astTypeStr}'
-        fileName = f'{saveLocation}\\{astId}-version{astVer}' if astVer is not None else f'{saveLocation}\\{astId}'
+        createDirectory(f'{cDir}')
+        saveLocation = createDirectory(f'{cDir}/{astId}') if sDirName is True else f'{cDir}/'
+        fileName = f'{saveLocation}/{astId}-version{astVer}' if astVer is not None else f'{saveLocation}/{cName}'
         assetSave = open(f'{fileName}{astTypes[getMeta(astId, "AssetTypeId")][1]}','wb+')
         assetSave.write(astData)
         assetSave.close()
@@ -111,7 +111,8 @@ def download(astId, astVer, args):
     resp = makeWebReq(url)
     if resp[0] == 200:
         print(f'Saving: {url}...')
-        save = saveAsset(astId, astTypes[getMeta(astId, 'AssetTypeId')][0], cDir, sDir, resp[1].content, astVer)
+        cName = args.name if args.name is not None else astId
+        save = saveAsset(astId, astTypes[getMeta(astId, 'AssetTypeId')][0], cDir, sDir, resp[1].content, astVer, cName)
         if save == 1:
             print(f'Saved asset sucessfully!')
         else:
@@ -179,6 +180,7 @@ cmdParse = argparse.ArgumentParser(description='Download assets from ROBLOX.')
 cmdParse.add_argument('downlmode', choices=['single', 'bulk', 'range', 'roulette'], help='mode for asset downloading', type=str)
 cmdParse.add_argument('assetid', help='id(s) of asset', type=str)
 cmdParse.add_argument('--dir', help='save assets into your own directory', type=str)
+cmdParse.add_argument('--name', help='save asset with a new name', type=str)
 cmdParse.add_argument('--ver', help='version(s) of the asset(s)', type=str)
 cmdParse.add_argument('--sdirs', help='save assets in their own directories', action='store_true')
 cmdParse.add_argument('--allVer', help='Download all of the versions of an asset (slow)', action='store_true')
